@@ -74,3 +74,60 @@ FAILFASTCI_API = getenv("FAILFAST_CI_API", "https://jobs.failfast-ci.io")
 
 BUILD_PULL_REQUEST = getenv("BUILD_PULL_REQUEST", "true")
 BUILD_PUSH = getenv("BUILD_PUSH", "false")
+
+
+class FailFastConfig(object):
+    """
+    """
+    def __init__(self, defaults=None):
+        self.project_settings = {
+                    'privacy': GITLAB_REPO_PRIVACY,
+                    'namespace': FAILFASTCI_NAMESPACE,
+                    'robot-user': GITLAB_USER,
+                    'branch': GITLAB_BRANCH,    # @TODO(ant31): Remove this key
+                    'trigger': GITLAB_TRIGGER,  # @TODO(ant31): Remove this key
+
+                    'enabled': {
+                        'shared_runners': GITLAB_ENABLE_SHARED_RUNNERS,
+                        'container_registry': GITLAB_ENABLE_CONTAINER_REGISTRY,
+                        'wiki': GITLAB_ENABLE_WIKI,
+                        'snippets': GITLAB_ENABLE_SNIPPETS,
+                        'issues': GITLAB_ENABLE_ISSUES,
+                        'merge_requests': GITLAB_ENABLE_MERGE_REQUESTS,
+                    }
+                }
+
+        self.settings = {
+            'failfast': {
+                'env': APP_ENVIRON,
+                'host': FAILFASTCI_API,
+                'build': {
+                    'push': ['master'],  # list branches (regexp) to trigger builds on push events
+                    'pr': ['*'],         # list branches (regexp) to trigger builds on PR events
+                    'tags': ['*']        # list branches (regexp) to trigger builds on new tags
+                }
+            },
+
+            'github': {
+                'context': GITHUB_CONTEXT,
+                'installation_id': GITHUB_INSTALLATION_ID,
+                'secret_token': GITHUB_SECRET_TOKEN,
+                'integration_id': GITHUB_INTEGRATION_ID,
+            },
+            'gitlab': {
+                'timeout': GITLAB_TIMEOUT,
+                'secret_token': GITLAB_SECRET_TOKEN,
+                'host': GITLAB_API,
+
+                'project-defaults': self.project_settings,
+                }
+            }
+
+        if defaults:
+            self.load(defaults)
+
+    def load(self, settings):
+        self.settings.update(settings)
+
+
+FFCONFIG = FailFastConfig()
